@@ -39,16 +39,16 @@ def connectionLoop(sock):
                   print('**************************************')
                   sock.sendto(bytes(m,'utf8'), (c[0],c[1]))
             
-            print("Now going to the other message")
+            print("Player connected")
             # Sends information of all connected clients to the newly connected client
-            Others = {"cmd": 2, "players": []}
+            Spawn = {"cmd": 2, "players": []}
             for c in clients:
                player = {}
                player['id'] = str(c)
                player['color'] = clients[c]['color']
-               Others['players'].append(player)
-            oth=json.dumps(Others)
-            print('OTHERS messsage: ')
+               Spawn['players'].append(player)
+            oth=json.dumps(Spawn)
+            print('Player: ')
             print(oth)
             print('**************************************')
             sock.sendto(bytes(oth,'utf8'), (addr[0], addr[1]))
