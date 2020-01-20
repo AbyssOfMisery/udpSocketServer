@@ -27,31 +27,31 @@ def connectionLoop(sock):
             # This deal with new connections
             clients[addr] = {}
             clients[addr]['lastBeat'] = datetime.now()
-            clients[addr]['color'] = {"R": random.random(), "G": random.random(), "B": random.random()}
-
+            clients[addr]['color'] = {"RED": random.random(), "GREEN": random.random(), "BLUE": random.random()}
+            clients[addr]['position'] = {"X": random.random(), "Y": random.random(), "Z": random.random()}
+            
             # Sends information of the new connected client to everyone - but the newly connected client
-            message = {"cmd": 0,"players":[{"id":str(addr), "color": clients[addr]['color']}]}
+            message = {"cmd": 0,"players":[{"id":str(addr), "color": clients[addr]['color'],"position": clients[addr]['position']}]}
             m = json.dumps(message)
             for c in clients:
                if c != addr :
                   print('NEW messsage: ')
                   print(m)
-                  print('**************************************')
                   sock.sendto(bytes(m,'utf8'), (c[0],c[1]))
             
-            print("Player connected")
+            print('Player Connected: ')
             # Sends information of all connected clients to the newly connected client
             Spawn = {"cmd": 2, "players": []}
             for c in clients:
                player = {}
                player['id'] = str(c)
                player['color'] = clients[c]['color']
+               player['position'] = clients[c]['position']
                Spawn['players'].append(player)
             oth=json.dumps(Spawn)
-            print('Player: ')
+            print('Player information')
             print(oth)
-            print('**************************************')
-            sock.sendto(bytes(oth,'utf8'), (addr[0], addr[1]))
+            sock.sendto(bytes(oth,'utf8'), (addr[0],addr[1]))
 
 # Every second verifies if clients are still active or not based on their heartbeat
 def cleanClients(sock):
@@ -59,10 +59,11 @@ def cleanClients(sock):
       deleteMessage = {"cmd": 3,"players":[]}
       for c in list(clients.keys()):
          if (datetime.now() - clients[c]['lastBeat']).total_seconds() > 5:
-            print('Dropped Client: ', c)
+            print('Player Left Clients: ', c)
             player = {}
             player['id'] = str(c)
             player['color'] = clients[c]['color']
+            player['position'] = clients[c]['position']
             deleteMessage['players'].append(player)
             clients_lock.acquire()
             del clients[c]
@@ -84,9 +85,11 @@ def gameLoop(sock):
       for c in clients:
          player = {}
          #Change color
-         clients[c]['color'] = {"R": random.random(), "G": random.random(), "B": random.random()}
+         clients[c]['color'] = {"RED": random.random(), "GREEN": random.random(), "BLUE": random.random()}
+         clients[c]['position'] = {"X": random.random(), "Y": random.random(), "Z": random.random()}
          player['id'] = str(c)
          player['color'] = clients[c]['color']
+         player['position'] = clients[c]['position']
          GameState['players'].append(player)
       s=json.dumps(GameState)
       #print(s)
@@ -96,9 +99,10 @@ def gameLoop(sock):
       time.sleep(1)
 
 def main():
+   host =""
    port = 12345
    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-   s.bind(('', port))
+   s.bind((host, port))
    start_new_thread(gameLoop, (s,))
    start_new_thread(connectionLoop, (s,))
    start_new_thread(cleanClients,(s,))
@@ -107,3 +111,4 @@ def main():
 
 if __name__ == '__main__':
    main()
+
