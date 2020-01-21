@@ -14,3 +14,6 @@ If a client does not send a heartbeat at least once every 5 seconds. The server 
 `cd udpSocketServer`
 
 `python3 udpSocketServer`
+
+* 1. use nano ~/.ssh/authorized_keys to open file in your EC2 server
+* 2. copy ssh key and paste into authorized_key file to allow cloud9 to authorize your EC2 sever
