@@ -8,14 +8,12 @@ import json
 
 clients_lock = threading.Lock()
 connected = 0
-xStep = 1.5
 
 clients = {}
 
 
 # this is the receiving message loop 
 def connectionLoop(sock):
-   global xStep
    global connected
    while True:
       data, addr = sock.recvfrom(1024)
@@ -40,12 +38,8 @@ def connectionLoop(sock):
             clients[addr]['color'] = {"R": random.random(), "G": random.random(), "B": random.random()}
             # Calculate the position of the newly acquired member
             finalCount = connected + 1
-            xCoord = (finalCount//2) * xStep
             
-            print(xCoord)
-            if (int(finalCount) % 2 == 1):
-               xCoord = -1 * xCoord
-            clients[addr]['position'] = {"x": xCoord,"y":0.0, "z":0.0}
+            clients[addr]['position'] = {"x": 0.0,"y":0.0, "z":0.0}
             # Sends information of the new connected client to everyone - but the newly connected client
             message = {"cmd": 0,"players":[{"id":str(addr), "color": clients[addr]['color'], "position": clients[addr]['position']}]}
             m = json.dumps(message)
@@ -115,9 +109,6 @@ def gameLoop(sock):
       for c in clients:
          sock.sendto(bytes(s,'utf8'), (c[0],c[1]))
       clients_lock.release()
-      #time.sleep(1/3)
-      #time.sleep(1/10)
-      #time.sleep(1/30)
       time.sleep(1/60)
 
 def main():
